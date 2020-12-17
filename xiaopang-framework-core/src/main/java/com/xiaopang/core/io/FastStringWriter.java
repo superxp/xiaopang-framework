@@ -1,0 +1,113 @@
+package com.xiaopang.core.io;
+
+/**
+ * @author necho.duan
+ * @title: FastStringWriter
+ * @projectName xiaopang-framework
+ * @description:
+ * @date 2020/12/2 19:30
+ */
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+
+public class FastStringWriter extends Writer {
+    private char[] buf;
+    private int count;
+
+    public FastStringWriter() {
+        this(64);
+    }
+
+    public FastStringWriter(int initialSize) {
+        if (initialSize < 0) {
+            throw new IllegalArgumentException("Negative initial size: " + initialSize);
+        } else {
+            this.buf = new char[initialSize];
+        }
+    }
+
+    @Override
+    public void write(int c) {
+        int newCount = this.count + 1;
+        if (newCount > this.buf.length) {
+            this.buf = Arrays.copyOf(this.buf, Math.max(this.buf.length << 1, newCount));
+        }
+
+        this.buf[this.count] = (char)c;
+        this.count = newCount;
+    }
+
+    @Override
+    public void write(char[] c, int off, int len) {
+        if (off >= 0 && off <= c.length && len >= 0 && off + len <= c.length && off + len >= 0) {
+            if (len != 0) {
+                int newCount = this.count + len;
+                if (newCount > this.buf.length) {
+                    this.buf = Arrays.copyOf(this.buf, Math.max(this.buf.length << 1, newCount));
+                }
+
+                System.arraycopy(c, off, this.buf, this.count, len);
+                this.count = newCount;
+            }
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    public void write(String str, int off, int len) {
+        int newCount = this.count + len;
+        if (newCount > this.buf.length) {
+            this.buf = Arrays.copyOf(this.buf, Math.max(this.buf.length << 1, newCount));
+        }
+
+        str.getChars(off, off + len, this.buf, this.count);
+        this.count = newCount;
+    }
+
+    public void writeTo(Writer out) throws IOException {
+        out.write(this.buf, 0, this.count);
+    }
+
+    public FastStringWriter append(CharSequence csq) {
+        String s = csq == null ? "null" : csq.toString();
+        this.write((String)s, 0, s.length());
+        return this;
+    }
+
+    @Override
+    public FastStringWriter append(CharSequence csq, int start, int end) {
+        String s = ((CharSequence)(csq == null ? "null" : csq)).subSequence(start, end).toString();
+        this.write((String)s, 0, s.length());
+        return this;
+    }
+
+    public FastStringWriter append(char c) {
+        this.write(c);
+        return this;
+    }
+
+    public void reset() {
+        this.count = 0;
+    }
+
+    public char[] toCharArray() {
+        return Arrays.copyOf(this.buf, this.count);
+    }
+
+    public int size() {
+        return this.count;
+    }
+
+    @Override
+    public String toString() {
+        return new String(this.buf, 0, this.count);
+    }
+
+    public void flush() {
+    }
+
+    public void close() {
+    }
+}
+

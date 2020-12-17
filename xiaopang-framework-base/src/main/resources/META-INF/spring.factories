@@ -1,0 +1,9 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.xiaopang.base.boot.XiaoPangBaseConfiguration,\
+  com.xiaopang.base.boot.XiaoPangStartEventListener
+
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+  com.xiaopang.base.analyzer.XiaoPangFailureAnalyzer
+
+org.springframework.context.ApplicationContextInitializer=\
+  com.xiaopang.base.logger.LoggerInitializer
